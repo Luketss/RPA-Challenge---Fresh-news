@@ -3,7 +3,13 @@ import time
 from RPA.Browser.Selenium import Selenium
 
 from setup import URL, SEARCH_PHRASE, NUMBER_OF_MONTHS
-from util import set_month_range
+from util import (
+    set_month_range,
+    write_csv_data,
+    replace_date_with_hour,
+    download_image_from_url,
+    check_for_dolar_sign,
+)
 
 
 class SeleniumScraper:
@@ -15,6 +21,11 @@ class SeleniumScraper:
 
     def open_website(self, url: str) -> None:
         self.browser_lib.open_available_browser(url)
+        self.browser_lib.maximize_browser_window()
+        terms_accept = "//button[@data-testid='GDPR-accept']"
+        is_term_button = self.browser_lib.does_page_contain_button(terms_accept)
+        if is_term_button:
+            self.browser_lib.click_button(locator=terms_accept)
 
     def begin_search(self, search_phrase: str):
         try:
@@ -61,11 +72,57 @@ class SeleniumScraper:
         except ValueError as e:
             raise f"Error on execution of select_category -> {e}"
 
-    def extract_website_data(self):
+    def load_all_news(self):
         show_more_button = "//button[normalize-space()='Show More']"
-        is_all_news_loaded = self.browser_lib.does_page_contain_button(show_more_button)
-        while is_all_news_loaded:
-            self.browser_lib.click_button_when_visible(show_more_button)
+        while self.browser_lib.does_page_contain_button(show_more_button):
+            try:
+                self.browser_lib.wait_until_page_contains_element(
+                    locator=show_more_button
+                )
+                self.browser_lib.scroll_element_into_view(locator=show_more_button)
+                self.browser_lib.click_button_when_visible(show_more_button)
+            except:
+                print("Page show more button done")
+
+    def get_element_value(self, path: str) -> str:
+        if self.browser_lib.does_page_contain_element(path):
+            return self.browser_lib.get_text(path)
+        return ""
+
+    def get_image_value(self, path: str) -> str:
+        if self.browser_lib.does_page_contain_element(path):
+            return self.browser_lib.get_element_attribute(path, "src")
+        return ""
+
+    def extract_website_data(self):
+        self.load_all_news()
+        element_list = "//ol[@data-testid='search-results']/li[@data-testid='search-bodega-result']"
+        news_list_elements = self.browser_lib.get_webelements(element_list)
+        extracted_data = []
+        for value in range(1, len(news_list_elements) + 1):
+            date = replace_date_with_hour(
+                self.get_element_value(f"{element_list}[{value}]//span[@data-testid]")
+            )
+            title = self.get_element_value(f"{element_list}[{value}]//h4")
+            description = self.get_element_value(f"{element_list}[{value}]//a/p")
+            image = download_image_from_url(
+                self.get_image_value(f"{element_list}[{value}]//img")
+            )
+
+            is_title_dolar = check_for_dolar_sign(title)
+            is_description_dolar = check_for_dolar_sign(description)
+
+            extracted_data.append(
+                [
+                    date,
+                    title,
+                    description,
+                    image,
+                    is_title_dolar,
+                    is_description_dolar,
+                ]
+            )
+        write_csv_data(extracted_data)
 
     def main(self) -> None:
         try:
@@ -74,8 +131,8 @@ class SeleniumScraper:
             # self.select_category()
             self.sort_newest_news()
             self.set_date_range(NUMBER_OF_MONTHS)
-            self.close_browser()
-        except:
+            self.extract_website_data()
+        finally:
             self.close_browser()
 
 
