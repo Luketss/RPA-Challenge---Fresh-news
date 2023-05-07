@@ -100,6 +100,28 @@ class SeleniumScraper:
             return self.browser_lib.get_element_attribute(path, "src")
         return ""
 
+    def load_all_news(self):
+        show_more_button = "//button[normalize-space()='Show More']"
+        while self.browser_lib.does_page_contain_button(show_more_button):
+            try:
+                self.browser_lib.wait_until_page_contains_element(
+                    locator=show_more_button
+                )
+                self.browser_lib.scroll_element_into_view(locator=show_more_button)
+                self.browser_lib.click_button_when_visible(show_more_button)
+            except:
+                print("Page show more button done")
+
+    def get_element_value(self, path: str) -> str:
+        if self.browser_lib.does_page_contain_element(path):
+            return self.browser_lib.get_text(path)
+        return ""
+
+    def get_image_value(self, path: str) -> str:
+        if self.browser_lib.does_page_contain_element(path):
+            return self.browser_lib.get_element_attribute(path, "src")
+        return ""
+
     def extract_website_data(self):
         self.load_all_news()
         element_list = "//ol[@data-testid='search-results']/li[@data-testid='search-bodega-result']"
