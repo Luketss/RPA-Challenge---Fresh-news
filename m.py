@@ -2,8 +2,6 @@
 import time
 from RPA.Browser.Selenium import Selenium
 
-from RPA.Robocorp.WorkItems import WorkItems
-
 from setup import URL, SEARCH_PHRASE, NUMBER_OF_MONTHS, CATEGORY
 from util import (
     set_month_range,
@@ -162,18 +160,12 @@ class SeleniumScraper:
 
     def main(self) -> None:
         try:
-            wi = WorkItems()
-            wi.get_input_work_item()
-            url = wi.get_work_item_variable("URL")
-            search_phrase = wi.get_work_item_variable("search_phrase")
-            category = wi.get_work_item_variable("category")
-            number_of_months = wi.get_work_item_variable("number_of_months")
             create_image_folder()
-            self.open_website(url=url)
-            self.begin_search(search_phrase=search_phrase)
-            self.select_category(categorys=category)
+            self.open_website(url=URL)
+            self.begin_search(search_phrase=SEARCH_PHRASE)
+            self.select_category(categorys=CATEGORY)
             self.sort_newest_news()
-            self.set_date_range(number_of_months)
+            self.set_date_range(NUMBER_OF_MONTHS)
             self.extract_website_data()
         finally:
             self.close_browser()
