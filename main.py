@@ -2,8 +2,16 @@
 import time
 from RPA.Browser.Selenium import Selenium
 
-from setup import URL, SEARCH_PHRASE, NUMBER_OF_MONTHS
-from util import set_month_range
+from setup import URL, SEARCH_PHRASE, NUMBER_OF_MONTHS, CATEGORY
+from util import (
+    set_month_range,
+    write_csv_data,
+    replace_date_with_hour,
+    download_image_from_url,
+    check_for_dolar_sign,
+    check_phrases,
+    create_image_folder,
+)
 
 
 class SeleniumScraper:
@@ -15,10 +23,15 @@ class SeleniumScraper:
 
     def open_website(self, url: str) -> None:
         self.browser_lib.open_available_browser(url)
+        self.browser_lib.maximize_browser_window()
+        terms_accept = "//button[@data-testid='GDPR-accept']"
+        is_term_button = self.browser_lib.does_page_contain_button(terms_accept)
+        if is_term_button:
+            self.browser_lib.click_button(locator=terms_accept)
 
     def begin_search(self, search_phrase: str):
         try:
-            search_xpath = "//button[@class='css-tkwi90 e1iflr850']"  # try change
+            search_xpath = "//button[@data-test-id='search-button']"
             self.browser_lib.click_button_when_visible(locator=search_xpath)
             field_xpath = "//input[@placeholder='SEARCH']"
             self.browser_lib.input_text(locator=field_xpath, text=search_phrase)
@@ -28,14 +41,18 @@ class SeleniumScraper:
         except ValueError as e:
             raise f"Error on execution of begin_search -> {e}"
 
-    def select_category(self) -> None:
-        try:
-            section_drop_btn = "//div[@data-testid='section']//button[@type='button']"
-            self.browser_lib.click_button_when_visible(locator=section_drop_btn)
-            drop_path = "(//ul[@class='css-64f9ga'])[1]"
+    def select_category(self, categorys) -> None:
+        for value in categorys:
+            try:
+                section_drop_btn = "//div[@data-testid='section']/button[@data-testid='search-multiselect-button']"
+                self.browser_lib.click_button_when_visible(locator=section_drop_btn)
+                sections_list = "//*[@data-testid='section']//li"
+                self.browser_lib.wait_until_page_contains_element(locator=sections_list)
+                section = f"//input[@data-testid='DropdownLabelCheckbox' and contains(@value, '{value}')]"
+                self.browser_lib.click_element(section)
 
-        except ValueError as e:
-            raise f"Error on execution of select_category -> {e}"
+            except:
+                print(f"Category not found")
 
     def sort_newest_news(self, list_value="newest") -> None:
         try:
@@ -43,7 +60,7 @@ class SeleniumScraper:
             self.browser_lib.select_from_list_by_value(sort_dropdow_btn, list_value)
 
         except ValueError as e:
-            raise f"Error on execution of select_category -> {e}"
+            raise f"Error on execution of sort_newest_news -> {e}"
 
     def set_date_range(self, number_of_months: int) -> None:
         try:
@@ -59,23 +76,76 @@ class SeleniumScraper:
             self.browser_lib.click_button_when_visible(locator=date_button)
 
         except ValueError as e:
-            raise f"Error on execution of select_category -> {e}"
+            raise f"Error on execution of data range -> {e}"
+
+    def load_all_news(self):
+        show_more_button = "//button[normalize-space()='Show More']"
+        while self.browser_lib.does_page_contain_button(show_more_button):
+            try:
+                self.browser_lib.wait_until_page_contains_element(
+                    locator=show_more_button
+                )
+                self.browser_lib.scroll_element_into_view(locator=show_more_button)
+                self.browser_lib.click_button_when_visible(show_more_button)
+            except:
+                print("Page show more button done")
+
+    def get_element_value(self, path: str) -> str:
+        if self.browser_lib.does_page_contain_element(path):
+            return self.browser_lib.get_text(path)
+        return ""
+
+    def get_image_value(self, path: str) -> str:
+        if self.browser_lib.does_page_contain_element(path):
+            return self.browser_lib.get_element_attribute(path, "src")
+        return ""
 
     def extract_website_data(self):
-        show_more_button = "//button[normalize-space()='Show More']"
-        is_all_news_loaded = self.browser_lib.does_page_contain_button(show_more_button)
-        while is_all_news_loaded:
-            self.browser_lib.click_button_when_visible(show_more_button)
+        self.load_all_news()
+        element_list = "//ol[@data-testid='search-results']/li[@data-testid='search-bodega-result']"
+        news_list_elements = self.browser_lib.get_webelements(element_list)
+        extracted_data = []
+        for value in range(1, len(news_list_elements) + 1):
+            date = replace_date_with_hour(
+                self.get_element_value(f"{element_list}[{value}]//span[@data-testid]")
+            )
+            title = self.get_element_value(f"{element_list}[{value}]//h4")
+            description = self.get_element_value(f"{element_list}[{value}]//a/p")
+            image = download_image_from_url(
+                self.get_image_value(f"{element_list}[{value}]//img")
+            )
+
+            is_title_dolar = check_for_dolar_sign(title)
+            is_description_dolar = check_for_dolar_sign(description)
+            phrases_count = check_phrases(text_pattern=SEARCH_PHRASE, text=title)
+
+            extracted_data.append(
+                [
+                    date,
+                    title,
+                    description,
+                    image,
+                    is_title_dolar,
+                    is_description_dolar,
+                    check_phrases(
+                        text_pattern=SEARCH_PHRASE,
+                        text=description,
+                        count=phrases_count,
+                    ),
+                ]
+            )
+        write_csv_data(extracted_data)
 
     def main(self) -> None:
         try:
+            create_image_folder()
             self.open_website(url=URL)
             self.begin_search(search_phrase=SEARCH_PHRASE)
-            # self.select_category()
+            self.select_category(categorys=CATEGORY)
             self.sort_newest_news()
             self.set_date_range(NUMBER_OF_MONTHS)
-            self.close_browser()
-        except:
+            self.extract_website_data()
+        finally:
             self.close_browser()
 
 
