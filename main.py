@@ -17,7 +17,7 @@ from util import (
 
 
 class SeleniumScraper:
-    def __init__(self):
+    def __init__(self, entry_phrase):
         self.browser_lib = Selenium()
 
     def close_browser(self) -> None:
@@ -44,6 +44,8 @@ class SeleniumScraper:
             raise f"Error on execution of begin_search -> {e}"
 
     def select_category(self, categorys) -> None:
+        if len(categorys) == 0:
+            return
         for value in categorys:
             try:
                 section_drop_btn = "//div[@data-testid='section']/button[@data-testid='search-multiselect-button']"
@@ -124,7 +126,7 @@ class SeleniumScraper:
             return self.browser_lib.get_element_attribute(path, "src")
         return ""
 
-    def extract_website_data(self) -> None:
+    def extract_website_data(self, search_phrase: str) -> None:
         self.load_all_news()
         element_list = "//ol[@data-testid='search-results']/li[@data-testid='search-bodega-result']"
         news_list_elements = self.browser_lib.get_webelements(element_list)
@@ -141,7 +143,7 @@ class SeleniumScraper:
 
             is_title_dolar = check_for_dolar_sign(title)
             is_description_dolar = check_for_dolar_sign(description)
-            phrases_count = check_phrases(text_pattern=SEARCH_PHRASE, text=title)
+            phrases_count = check_phrases(text_pattern=search_phrase, text=title)
 
             extracted_data.append(
                 [
@@ -152,7 +154,7 @@ class SeleniumScraper:
                     is_title_dolar,
                     is_description_dolar,
                     check_phrases(
-                        text_pattern=SEARCH_PHRASE,
+                        text_pattern=search_phrase,
                         text=description,
                         count=phrases_count,
                     ),
@@ -162,23 +164,30 @@ class SeleniumScraper:
 
     def main(self) -> None:
         try:
-            wi = WorkItems()
-            wi.get_input_work_item()
-            url = wi.get_work_item_variable("URL")
-            search_phrase = wi.get_work_item_variable("search_phrase")
-            category = wi.get_work_item_variable("category")
-            number_of_months = wi.get_work_item_variable("number_of_months")
             create_image_folder()
-            self.open_website(url=url)
-            self.begin_search(search_phrase=search_phrase)
-            self.select_category(categorys=category)
+            self.open_website(url=URL)
+            self.begin_search(search_phrase=SEARCH_PHRASE)
+            self.select_category(categorys=CATEGORY)
             self.sort_newest_news()
-            self.set_date_range(number_of_months)
-            self.extract_website_data()
+            self.set_date_range(NUMBER_OF_MONTHS)
+            self.extract_website_data(SEARCH_PHRASE)
+            # wi = WorkItems()
+            # wi.get_input_work_item()
+            # url = wi.get_work_item_variable("URL")
+            # search_phrase = wi.get_work_item_variable("search_phrase")
+            # category = wi.get_work_item_variable("category")
+            # number_of_months = wi.get_work_item_variable("number_of_months")
+            # create_image_folder()
+            # self.open_website(url=url)
+            # self.begin_search(search_phrase=search_phrase)
+            # self.select_category(categorys=category)
+            # self.sort_newest_news()
+            # self.set_date_range(number_of_months)
+            # self.extract_website_data(search_phrase)
         finally:
             self.close_browser()
 
 
 if __name__ == "__main__":
-    obj = SeleniumScraper()
+    obj = SeleniumScraper(SEARCH_PHRASE)
     obj.main()
