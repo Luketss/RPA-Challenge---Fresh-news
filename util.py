@@ -40,7 +40,6 @@ def write_csv_data(data: list) -> None:
 
 
 def download_image_from_url(image_url: str) -> str:
-    # this need to be checked, i don't think all the images are present in a six month range
     image_name = str(uuid.uuid4())
     if image_url == "":
         return ""
