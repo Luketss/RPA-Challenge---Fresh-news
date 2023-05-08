@@ -31,7 +31,7 @@ class SeleniumScraper:
         if is_term_button:
             self.browser_lib.click_button(locator=terms_accept)
 
-    def begin_search(self, search_phrase: str):
+    def begin_search(self, search_phrase: str) -> None:
         try:
             search_xpath = "//button[@data-test-id='search-button']"
             self.browser_lib.click_button_when_visible(locator=search_xpath)
@@ -102,7 +102,7 @@ class SeleniumScraper:
             return self.browser_lib.get_element_attribute(path, "src")
         return ""
 
-    def load_all_news(self):
+    def load_all_news(self) -> None:
         show_more_button = "//button[normalize-space()='Show More']"
         while self.browser_lib.does_page_contain_button(show_more_button):
             try:
@@ -124,7 +124,7 @@ class SeleniumScraper:
             return self.browser_lib.get_element_attribute(path, "src")
         return ""
 
-    def extract_website_data(self):
+    def extract_website_data(self) -> None:
         self.load_all_news()
         element_list = "//ol[@data-testid='search-results']/li[@data-testid='search-bodega-result']"
         news_list_elements = self.browser_lib.get_webelements(element_list)

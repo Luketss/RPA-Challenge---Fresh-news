@@ -6,7 +6,7 @@ import requests
 import uuid
 
 
-def create_image_folder():
+def create_image_folder() -> None:
     dir = "./images"
     if not os.path.exists(dir):
         os.makedirs(dir)
@@ -39,7 +39,7 @@ def write_csv_data(data: list) -> None:
         writer.writerows(data)
 
 
-def download_image_from_url(image_url: str):
+def download_image_from_url(image_url: str) -> str:
     # this need to be checked, i don't think all the images are present in a six month range
     image_name = str(uuid.uuid4())
     if image_url == "":
