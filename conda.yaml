@@ -2,13 +2,11 @@ name: robocorp
 channels:
   - conda-forge
 dependencies:
-  - python=3.7.9
-  - codecov
   - async-generator==1.10
   - attrs==23.1.0
   - beautifulsoup4==4.12.2
   - cached-property==1.5.2
-  - certifi==2022.12.7
+  - certifi==2023.5.7
   - cffi==1.15.1
   - chardet==3.0.4
   - charset-normalizer==3.1.0
@@ -92,7 +90,7 @@ dependencies:
   - rpaframework-core==11.0.1
   - rpaframework-pdf==7.1.5
   - rpaframework-windows==7.3.2
-  - selenium==4.9.0
+  - selenium==4.9.1
   - simple-salesforce==1.12.3
   - six==1.16.0
   - smartsheet-python-sdk==3.0.0
@@ -109,7 +107,7 @@ dependencies:
   - tzdata==2023.3
   - tzlocal==4.3
   - uiautomation==2.0.18
-  - urllib3==1.26.15
+  - urllib3==2.0.2
   - validators==0.20.0
   - webdriver-manager==3.8.6
   - wrapt==1.15.0
