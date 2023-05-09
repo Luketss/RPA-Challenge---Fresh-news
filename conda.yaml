@@ -1,7 +1,6 @@
-name: env-name
+name: robocorp
 channels:
   - conda-forge
-  - defaults
 dependencies:
   - python=3.11.1
   - codecov
