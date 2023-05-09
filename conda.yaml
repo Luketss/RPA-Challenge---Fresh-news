@@ -1,9 +1,8 @@
-name: env-name
+name: robocorp
 channels:
   - conda-forge
-  - defaults
 dependencies:
-  - python=3.11.1
+  - python=3.7.9
   - codecov
   - async-generator==1.10
   - attrs==23.1.0
