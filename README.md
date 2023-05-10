@@ -1,3 +1,4 @@
+https://thoughtfulautomation.notion.site/RPA-Challenge-Fresh-news-fa3f504bb7824e1aa9c083906ca1bba7
 # Fresh-news
 Fresh-news is a Python application that scrape news using a pre defined set of words
 
