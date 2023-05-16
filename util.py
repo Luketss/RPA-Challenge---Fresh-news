@@ -5,6 +5,8 @@ import datetime
 import requests
 import uuid
 
+from RPA.Excel.Files import Files
+
 
 def create_image_folder() -> None:
     dir = "./images"
@@ -32,11 +34,18 @@ def replace_date_with_hour(date: str) -> str:
     return date
 
 
+# def write_csv_data(data: list) -> None:
+#     with open("result.csv", "w") as f:
+#         writer = csv.writer(f)
+#         # writer.writerow(header)
+#         writer.writerows(data)
+
+
 def write_csv_data(data: list) -> None:
-    with open("resultado.csv", "w") as f:
-        writer = csv.writer(f)
-        # writer.writerow(header)
-        writer.writerows(data)
+    lib = Files()
+    lib.create_workbook()
+    lib.append_rows_to_worksheet(data)
+    lib.save_workbook("result.xlsx")
 
 
 def download_image_from_url(image_url: str) -> str:

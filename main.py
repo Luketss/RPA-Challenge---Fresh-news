@@ -17,7 +17,7 @@ from util import (
 
 
 class SeleniumScraper:
-    def __init__(self, entry_phrase):
+    def __init__(self):
         self.browser_lib = Selenium()
 
     def close_browser(self) -> None:
@@ -105,14 +105,14 @@ class SeleniumScraper:
         return ""
 
     def load_all_news(self) -> None:
-        show_more_button = "//button[normalize-space()='Show More']"
+        show_more_button = "//button[@data-testid='search-show-more-button']"
         while self.browser_lib.does_page_contain_button(show_more_button):
             try:
                 self.browser_lib.wait_until_page_contains_element(
                     locator=show_more_button
                 )
-                self.browser_lib.scroll_element_into_view(locator=show_more_button)
-                self.browser_lib.click_button_when_visible(show_more_button)
+                time.sleep(1)
+                self.browser_lib.click_element(show_more_button)
             except:
                 print("Page show more button done")
 
@@ -165,30 +165,31 @@ class SeleniumScraper:
     def main(self) -> None:
         try:
             create_image_folder()
+            # wi = WorkItems()
+            # wi.get_input_work_item()
+            # url = wi.get_work_item_variable("url")
+            # search_phrase = wi.get_work_item_variable("search_phrase")
+            # category = wi.get_work_item_variable("category")
+            # number_of_months = wi.get_work_item_variable("number_of_months")
             self.open_website(url=URL)
             self.begin_search(search_phrase=SEARCH_PHRASE)
             self.select_category(categorys=CATEGORY)
             self.sort_newest_news()
             self.set_date_range(NUMBER_OF_MONTHS)
             self.extract_website_data(SEARCH_PHRASE)
-            wi = WorkItems()
-            wi.get_input_work_item()
-            # url = wi.get_work_item_variable("URL")
-            wi.create_output_work_item(files="./resultado.csv", save=True)
-            # search_phrase = wi.get_work_item_variable("search_phrase")
-            # category = wi.get_work_item_variable("category")
-            # number_of_months = wi.get_work_item_variable("number_of_months")
-            # create_image_folder()
+
             # self.open_website(url=url)
             # self.begin_search(search_phrase=search_phrase)
             # self.select_category(categorys=category)
             # self.sort_newest_news()
             # self.set_date_range(number_of_months)
             # self.extract_website_data(search_phrase)
+            # wi.create_output_work_item(files="./result.csv", save=True)
+            # wi.add_work_item_files("./images")
         finally:
             self.close_browser()
 
 
 if __name__ == "__main__":
-    obj = SeleniumScraper(SEARCH_PHRASE)
+    obj = SeleniumScraper()
     obj.main()
