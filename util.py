@@ -4,6 +4,7 @@ import csv
 import datetime
 import requests
 import uuid
+import glob
 
 from RPA.Excel.Files import Files
 
@@ -84,6 +85,11 @@ def split_extracted_text(text: list) -> tuple[str, str]:
         return date, title, description
     except:
         return "", "", ""
+
+
+def get_all_files_from_folder(path="./images/*.jpg"):
+    files = glob.glob(path)
+    return files
 
 
 if __name__ == "__main__":

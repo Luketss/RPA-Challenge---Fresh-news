@@ -13,6 +13,7 @@ from util import (
     check_for_dolar_sign,
     check_phrases,
     create_image_folder,
+    get_all_files_from_folder,
 )
 
 
@@ -177,8 +178,11 @@ class SeleniumScraper:
             self.sort_newest_news()
             self.set_date_range(number_of_months)
             self.extract_website_data(search_phrase)
-            wi.create_output_work_item(files="./result.csv", save=True)
-            wi.add_work_item_files("./images")
+            wi.add_work_item_file("./result.xlsx", "RESULT_EXCEL.xlsx")
+            files = get_all_files_from_folder()
+            wi.create_output_work_item(files=files, save=True)
+            wi.create_output_work_item(files="./result.xlsx", save=True)
+
         finally:
             self.close_browser()
 
