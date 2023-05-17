@@ -51,3 +51,17 @@ To use the program, open the main.py file and set the following variables in the
     ```
 
 Once you have set these variables, you can run the program using Python.
+
+
+Sample Payload to run inside Robocorp
+```
+{
+  "url": "https://www.nytimes.com/",
+  "search_phrase": "business",
+  "number_of_months": 1,
+  "category": [
+    "Arts",
+    "Books"
+  ]
+}
+```
