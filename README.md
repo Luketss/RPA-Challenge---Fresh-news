@@ -2,7 +2,7 @@ https://thoughtfulautomation.notion.site/RPA-Challenge-Fresh-news-fa3f504bb7824e
 # Fresh-news
 Fresh-news is a Python application that scrape news using a pre defined set of words
 
-#Scraping New York Times website
+# Scraping New York Times website
 
 This project uses Python and Selenium library to scrape the New York Times website for news articles. The program allows the user to select a search phrase, category, and date range for the articles they want to retrieve. The data is extracted and saved to a CSV file.
 Prerequisites
